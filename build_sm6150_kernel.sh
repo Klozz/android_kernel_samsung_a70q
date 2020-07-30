@@ -52,7 +52,7 @@ PROJECT_NAME=${VARIANT}
 #	VARIANT_DEFCONFIG=sm6150_sec_${MODEL}_${REGION}_${CARRIER}_defconfig
 #fi
 
-VARIANT_DEFCONFIG=sm6150_sec_a70s_swa_open_defconfig
+VARIANT_DEFCONFIG=Yuki_a70_defconfig
 
 BUILD_CONF_PATH=$BUILD_ROOT_DIR/buildscript/build_conf/${MODEL}
 BUILD_CONF=${BUILD_CONF_PATH}/common_build_conf.${MODEL}
@@ -87,34 +87,34 @@ FUNC_BUILD_KERNEL()
 
 
     chmod u+w $PRODUCT_OUT/mkbootimg_ver_args.txt
-    echo '--cmdline "console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 earlycon=msm_serial_dm,0xc1b0000 boot_cpus=0-3 androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 sched_enable_hmp=1 sched_enable_power_aware=1 androidboot.selinux=permissive service_locator.enable=1" --base 0x00000000 --pagesize 4096 --os_version 8.1.0 --os_patch_level 2018-04-01 --ramdisk_offset 0x02000000 --tags_offset 0x01E00000 '   >  $PRODUCT_OUT/mkbootimg_ver_args.txt
+    echo '--cmdline "console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 earlycon=msm_serial_dm,0xc1b0000 boot_cpus=0-3 androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 sched_enable_hmp=1 sched_enable_power_aware=1 androidboot.selinux=permissive service_locator.enable=1" --base 0x00000000 --pagesize 4096 --os_version 9.0.0 --os_patch_level 2022-06-25 --ramdisk_offset 0x02000000 --tags_offset 0x01E00000 '   >  $PRODUCT_OUT/mkbootimg_ver_args.txt
 
     echo ----------------------------------------------
     echo info $PRODUCT_OUT/mkbootimg_ver_args.txt
     echo ----------------------------------------------
     cat  $PRODUCT_OUT/mkbootimg_ver_args.txt
     echo ----------------------------------------------
-
+#			$KERNEL_DEFCONFIG \
 	make -C $BUILD_KERNEL_DIR O=$BUILD_KERNEL_OUT_DIR -j$BUILD_JOB_NUMBER $KERNEL_MAKE_ENV ARCH=arm64 \
 			CROSS_COMPILE=$BUILD_CROSS_COMPILE \
 			REAL_CC=$KERNEL_LLVM_BIN \
 			CLANG_TRIPLE=$CLANG_TRIPLE \
-			$KERNEL_DEFCONFIG \
-			VARIANT_DEFCONFIG=$VARIANT_DEFCONFIG \
-			DEBUG_DEFCONFIG=$DEBUG_DEFCONFIG \
-			SELINUX_DEFCONFIG=$SELINUX_DEFCONFIG \
-			SELINUX_LOG_DEFCONFIG=$SELINUX_LOG_DEFCONFIG \
-			DMVERITY_DEFCONFIG=$DMVERITY_DEFCONFIG \
-			KASLR_DEFCONFIG=$KASLR_DEFCONFIG || exit -1
+			VARIANT_DEFCONFIG=$VARIANT_DEFCONFIG || exit -1
+#			DEBUG_DEFCONFIG=$DEBUG_DEFCONFIG \
+#			SELINUX_DEFCONFIG=$SELINUX_DEFCONFIG \
+#			SELINUX_LOG_DEFCONFIG=$SELINUX_LOG_DEFCONFIG \
+#			DMVERITY_DEFCONFIG=$DMVERITY_DEFCONFIG \
+#			KASLR_DEFCONFIG=$KASLR_DEFCONFIG || exit -1
 
-	make -C $BUILD_KERNEL_DIR O=$BUILD_KERNEL_OUT_DIR -j$BUILD_JOB_NUMBER $KERNEL_MAKE_ENV ARCH=arm64 \
+  make -C $BUILD_KERNEL_DIR O=$BUILD_KERNEL_OUT_DIR -j$BUILD_JOB_NUMBER $KERNEL_MAKE_ENV ARCH=arm64 \
 			CROSS_COMPILE=$BUILD_CROSS_COMPILE \
 			REAL_CC=$KERNEL_LLVM_BIN \
 			CLANG_TRIPLE=$CLANG_TRIPLE  || exit -1
 
-#	make -C $BUILD_KERNEL_DIR O=$BUILD_KERNEL_OUT_DIR -j$BUILD_JOB_NUMBER $KERNEL_MAKE_ENV ARCH=arm64 \
-#			CROSS_COMPILE=$BUILD_CROSS_COMPILE dtbs || exit -1
-	$BUILD_KERNEL_DIR/tools/mkdtimg create $PRODUCT_OUT/dtbo.img --page_size=4096 $BUILD_KERNEL_OUT_DIR/arch/arm64/boot/dts/samsung/sm6150-sec-${MODEL}-${REGION}-overlay*.dtbo
+	make -C $BUILD_KERNEL_DIR O=$BUILD_KERNEL_OUT_DIR -j$BUILD_JOB_NUMBER $KERNEL_MAKE_ENV ARCH=arm64 \
+			CROSS_COMPILE=$BUILD_CROSS_COMPILE dtbs || exit -1
+	#$BUILD_KERNEL_DIR/tools/mkdtimg create $PRODUCT_OUT/dtbo.img --page_size=4096 /home/klozz/samsung/kernel/out/obj/KERNEL_OBJ/arch/arm64/boot/dts/samsung/sm6150-sec-${MODEL}*overlay*.dtbo
+	$BUILD_KERNEL_DIR/tools/mkdtimg create $PRODUCT_OUT/dtbo.img --page_size=4096 $(find out -name "*.dtbo")
 
     rsync -cv $KERNEL_ZIMG $PRODUCT_OUT/kernel
 
